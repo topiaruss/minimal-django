@@ -1,19 +1,45 @@
-db:
-  image: postgres
-
 web:
   build: .
-
   environment:
-    - DB_SERVICE: postgres
-
+    VIRTUAL_HOST: dev.minimal-django.net
+    DB_NAME: postgres
+    DB_SERVICE: db
+    DB_PORT: 5432
   volumes:
-    - .:/code
-
+    - /var/run/docker.sock:/tmp/docker.sock:ro
+    - /usr/src/app/static
+    - /var/log
   ports:
     - "8000"
-
   links:
     - db
+  command: ./do_run_server
 
-  command: python manage.py runserver 0.0.0.0:8000
+nginx:
+  restart: always
+  build: ./nginx
+  ports:
+    - "80:80"
+    - "443:443"
+  volumes:
+    - /www/static
+    - /var/log/nginx
+  volumes_from:
+    - web
+  links:
+    - web:web
+
+db:
+  restart: always
+  image: postgres:latest
+  volumes_from:
+    - data
+  ports:
+    - "5432:5432"
+
+data:
+  image: postgres:latest
+  volumes:
+    - /var/lib/postgresql
+  command: echo "Data-only container for db"
+

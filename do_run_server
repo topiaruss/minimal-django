@@ -1,0 +1,8 @@
+#! /bin/bash
+
+python manage.py migrate
+
+gunicorn \
+  --env DB_SERVICE=$DB_SERVICE \
+  --log-level=debug \
+  composeexample.wsgi:application -w 2 -b :8000
