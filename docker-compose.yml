@@ -1,0 +1,19 @@
+db:
+  image: postgres
+
+web:
+  build: .
+
+  environment:
+    - DB_SERVICE: postgres
+
+  volumes:
+    - .:/code
+
+  ports:
+    - "8000"
+
+  links:
+    - db
+
+  command: python manage.py runserver 0.0.0.0:8000
